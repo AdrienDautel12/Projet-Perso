@@ -1,0 +1,133 @@
+<---------------------------
+
+CODE POUR GPS
+
+--------------------------->
+
+<---------------------------
+CODE CLASSE GPS
+--------------------------->
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heure_minute
+{
+    class gps
+    {
+        public static int hh;
+        public static int mm;
+        public static void decoder(string original)
+        {
+
+            string[] etape1 = original.Split(',');
+            string[] etape2 = etape1[1].Split('.');
+            string hhmmss = etape2[0];
+            int hh = int.Parse(hhmmss.Substring(0, 2));
+            int mm = int.Parse(hhmmss.Substring(2, 2));
+            int ss = int.Parse(hhmmss.Substring(4, 2));
+            string latDeg = etape1[2].Substring(0, 2);
+            string latMin = etape1[2].Substring(2, 7);
+            latMin = latMin.Replace(',', '.');  
+            
+        }
+        public static void toto(int a, int b = 2, bool c = false)
+        {
+        }
+    }
+}
+
+<---------------------------
+
+CODE PROGRAM ET MAIN
+
+--------------------------->
+
+using NmeaParser.Messages;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO.Ports;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heure_minute
+{
+    class Program
+    {
+        private static SerialPort sp = null;
+
+        //private static string Lire(int nbCar)
+        //{
+        //    char c;
+        //    string chaine = "";
+        //    for (int i = 0; i < nbCar; i++)
+        //    {
+        //        c = (char)sp.ReadChar();
+        //        chaine = chaine + c;
+        //    }
+        //    return chaine;
+        //}
+
+        private static string Lire()
+        {
+            char c;
+            string chaine = "";
+            do
+            {
+                c = (char)sp.ReadChar();
+                chaine = chaine + c;
+            }
+            while (c != '*');
+
+            for (int i = 0; i < 2; i++)
+                chaine = chaine + (char)sp.ReadChar(); // lit la checksum (2cars)
+
+            return chaine;
+        }
+        static void Main(string[] args)
+        {
+            //string original = "$GPGGA,145810.000,4836.5375,N,00740.9373,E,bidon";
+            //gps.decoder(original);
+            //int heure = gps.hh;
+
+            // string titi = "$GPGGA,143718.00,4513.13793,S,01859.19704,E,1,05,1.86,108.1,M,38.1,M,,*43";
+            // NmeaMessage toto = NmeaMessage.Parse(titi, null, true);
+
+            sp = new SerialPort("COM5", 4800, Parity.None, 8, StopBits.One);
+            sp.Open();
+
+            char c;
+            string chaine = "";
+
+            //attente du $
+
+
+
+
+            while (sp.ReadChar() != '$') ;
+            // lire 5 car --> string
+            for (int i = 0; i < 5; i++)
+            {
+                c = (char)sp.ReadChar();
+                chaine = chaine + (char)sp.ReadChar();
+            }
+            switch (chaine)
+            {
+                case "GPGGA":
+                    chaine = chaine + Lire();
+                    break;
+
+                case "GPRMC":
+                    chaine = chaine + Lire();
+                    break;
+            }
+            chaine = '$' + chaine;
+            NmeaMessage gga = NmeaMessage.Parse(chaine, null, true);
+        }
+
+    }
+}
