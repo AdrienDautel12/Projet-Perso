@@ -1,0 +1,188 @@
+<------------------------------
+
+CODE DES CLASSES
+
+------------------------------>
+
+<------------------------------
+CLASSE CERCLE
+------------------------------>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heritage_polymorphisme
+{
+    class Cercle : Figure
+    {
+        private double rayon;
+        private double diametre;        //attribut dérivé
+
+        public void setRayon(double r)
+        {
+            rayon = r;
+            // seul endroit ou il y a la définition de diamètre : attribut dérivé
+            diametre = 2 * rayon;   
+        }
+        public double getRayon()
+        {
+            return rayon;
+        }
+        public double getDiametre()
+        {
+            return diametre;
+        }
+        public Cercle(double rayon, double origineX, double origineY) : base(origineX, origineY)
+        {
+            //this.rayon = rayon;
+            setRayon(rayon);
+        }
+        public override double Surface()
+        {
+            return 2 * Math.PI * rayon;
+        }
+    }
+}
+<------------------------------
+CLASSE RECTANGLE
+------------------------------>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heritage_polymorphisme
+{
+    class Rectangle : Figure, IRotation
+    {
+        private double angle;
+        private double longueur;
+        private double largeur;
+
+        public void setLongueur(double L)
+        {
+            longueur = L;
+        }
+        public void setLargeur(double l)
+        {
+            largeur = l;
+        }
+        public double getLongueur()
+        {
+            return longueur;
+        }
+        public double getLargeur()
+        {
+            return largeur;
+        }
+        public Rectangle(double longueur, double Largeur, double origineX, double origineY) : base(origineX, origineY)
+        {
+            this.longueur = longueur;
+            largeur = Largeur;
+        }
+        public override double Surface()
+        {
+            return longueur * largeur;
+        }
+        public void Rotation(double degre)
+        {
+            angle = degre;
+            //encrageX = 56;
+        }
+    }
+}
+
+
+<------------------------------
+CLASSE FIGURE
+------------------------------>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heritage_polymorphisme
+{
+    abstract class Figure   // non instanciable par l'utilisateur
+    {
+        protected double encrageX;  // accès public depuis les classes héritière ; private depuis l'extérieur
+        private double encrageY;
+        //private bool isFull;
+        public Figure(double x, double y)
+        {
+            encrageX = x;
+            encrageY = y;
+        }
+
+        // contrat à implémenter dans les classes héritères
+        public abstract double Surface();
+    }
+}
+
+<------------------------------
+CODE ROTATION
+------------------------------>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heritage_polymorphisme
+{
+    interface IRotation // interface = contrat: obligation de coder la méthode. <=> abstract cl
+    {
+        void Rotation(double degre);
+    }
+}
+
+
+<------------------------------
+
+CODE DU MAIN
+
+------------------------------>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1_heritage_polymorphisme
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // a est une REFERENCE sur une instance de la classe Rectangle
+            Rectangle a = new Rectangle(2, 3, 4, 5);
+            Figure b = new Rectangle(9, 4, 1, 6);
+
+
+            List<Figure> contener = new List<Figure>();
+            contener.Add(new Cercle(2, 0, 1));
+            contener.Add(new Rectangle(5, 3, 4, 9));
+            //contener.Add(new Figure(2, 1));
+
+            foreach (Figure f in contener)
+                Console.WriteLine(f.Surface()); //polymorphisme
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
