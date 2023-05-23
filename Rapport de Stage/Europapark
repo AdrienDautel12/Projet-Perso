@@ -1,0 +1,384 @@
+<----------------------
+
+CODE DU CYCLISME
+
+---------------------->
+
+<----------------------
+CODE DE LA PAGE D'ACCUEIL
+---------------------->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Liste Personne</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </h:head>
+    <body>
+        <h1>Ajouter des personnes :</h1>
+        <h:form>
+            <p:panelGrid columns="2">
+                Nom: <p:inputText value="#{personneManageBean.personne.nom}" required="true" label="nom"/>
+                Prénom: <p:inputText value="#{personneManageBean.personne.prenom}" required="true" label="prenom"/>
+                Date de Naissance: <p:calendar value="#{personneManageBean.personne.dateDeNaissance}" required="true" label="dateDeNaissance"/>
+                Lattitude: <p:inputText value="#{personneManageBean.personne.lattitude}" required="true" label="lattitude"/>
+                Longitude: <p:inputText value="#{personneManageBean.personne.longitude}" required="true" label="longitude"/>
+
+            </p:panelGrid>
+            <p:commandButton action="#{personneManageBean.create()}" icon="pi pi-check" styleClass="rounded-button" style="width: 30" ajax="false"/>
+        </h:form>
+        
+        
+        
+        
+        
+        <h1> Editer une Personne:</h1>
+        <h:form>
+            <p:dataTable value ="#{personneManageBean.listePersonne}" var="p" >
+
+                <p:column headerText="Nom" filterBy="#{p.nom}">
+                    <h:outputText value="#{p.nom}" />               
+                </p:column>
+                <p:column headerText="Prénom" filterBy="#{p.prenom}">
+                    <h:outputText value="#{p.prenom}" />
+                </p:column>
+                <p:column headerText="Date de naissance" filterBy="#{p.dateDeNaissance}">
+                    <h:outputText value="#{p.dateDeNaissance}">
+                        <f:convertDateTime pattern="dd/MM/YYYY"/>
+                    </h:outputText>
+                </p:column>                
+                <p:column headerText="Lattitude" filterBy="#{p.lattitude}">
+                    <h:outputText value="#{p.lattitude}" />
+                </p:column>
+                <p:column headerText="Longitude" filterBy="#{p.longitude}">
+                    <h:outputText value="#{p.longitude}" />
+                </p:column>
+                <p:column headerText="Supprimer" >
+                    <p:commandButton value="Supprimer" action="#{personneManageBean.delete(p)}" ajax="false"/>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+    </body>
+</html>
+
+<----------------------
+
+CODE DES CLASSES
+
+---------------------->
+<----------------------
+CODE DE CLIENT
+---------------------->
+
+package com.stema.controleur;
+
+import javax.persistence.Entity;
+import javax.xml.bind.annotation.XmlRootElement;
+
+
+@Entity
+@XmlRootElement
+public class Client extends Personne {
+    
+   private String email;
+   private String motDePasse;
+
+    public Client() {
+    }
+  
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
+    }
+    
+}
+<----------------------
+CODE DE PERSONNE
+---------------------->
+
+package com.stema.controleur;
+
+import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Personne {
+    
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idPersonne;
+    
+    
+    private String nom;
+    private String prenom;
+    
+    @Temporal(TemporalType.DATE)
+    private Date dateDeNaissance;
+    
+    private String lattitude;
+    private String longitude;
+
+    public Personne() {
+    }
+    
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public int getIdPersonne() {
+        return idPersonne;
+    }
+
+    public void setIdPersonne(int idPersonne) {
+        this.idPersonne = idPersonne;
+    }
+
+    public Date getDateDeNaissance() {
+        return dateDeNaissance;
+    }
+
+    public void setDateDeNaissance(Date dateDeNaissance) {
+        this.dateDeNaissance = dateDeNaissance;
+    }
+
+   
+    
+
+    public String getLattitude() {
+        return lattitude;
+    }
+
+    public void setLattitude(String lattitude) {
+        this.lattitude = lattitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+    
+}
+
+<----------------------
+
+CODE DU CONTROLEUR
+
+---------------------->
+
+package com.stema.managebean;
+
+import com.stema.controleur.Personne;
+import com.stema.modele.PersonneModele;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
+
+
+@Named
+@RequestScoped
+public class PersonneManageBean implements Serializable {
+    
+    
+    @EJB
+    private PersonneModele personneModel;
+    private List<Personne> listePersonne = new ArrayList<>();
+    private Personne p = new Personne();
+    
+    
+   public String edit(){
+       //personneModel.create(this.p);
+       return null;
+   }   
+
+    public PersonneModele getPersonneModel() {
+        return personneModel;
+    }
+
+    public void setPersonneModel(PersonneModele personneModel) {
+        this.personneModel = personneModel;
+    }
+
+    public List<Personne> getListePersonne() {
+        this. listePersonne = personneModel.read();
+        return this.listePersonne;
+        
+    }
+
+    public void setListePersonne(List<Personne> listePersonne) {
+        this.listePersonne = listePersonne;
+    }
+
+    public Personne getPersonne() {
+        return p;
+    }
+
+    public void setPersonne(Personne personne) {
+        this.p = personne;
+    }
+    
+    public void create(){
+        personneModel.create(this.p);
+        //permet de recrée une personne (rafraichir la page)
+        this.p=new Personne();
+    }
+    public void delete(Personne p) {
+        personneModel.delete(p);
+    }
+   
+}
+
+<----------------------
+
+CODE DU MODELE
+
+---------------------->
+
+package com.stema.modele;
+
+import com.stema.controleur.Personne;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+@Stateless
+public class PersonneModele {
+    
+    
+    @PersistenceContext
+    private EntityManager em;
+    
+    //permet de crée
+    public void create (Personne p){
+        em.persist(p);
+    }
+    
+    //permet de lister
+    public List <Personne> read (){
+        Query query=em.createQuery("SELECT listePersonne FROM Personne as listePersonne");
+        return query.getResultList();
+    }
+    //permet de modifier
+    public void update (Personne p){
+        em.merge(p);
+    }
+    
+    //permet de supprimer
+    public void delete (Personne p){
+        
+        em.remove(em.merge(p));
+    }
+    
+    
+}
+
+<----------------------
+
+CODE DES SEVICES WEB
+
+---------------------->
+
+package com.stema.ws;
+
+import com.stema.controleur.Personne;
+import com.stema.modele.PersonneModele;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+/**
+ *
+ * @author jerom
+ */
+@Path("/client")
+public class ClientREST {
+
+     //injecter le modele dans le contrôleur REST
+    @EJB
+    private PersonneModele personneModel;
+    
+    
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String test() {
+        return "Serveur <b>EUROPAPARK</b>";
+    }
+
+    //READ
+    @GET
+    @Path("/liste")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Personne> read() {
+        return personneModel.read();
+    }
+    
+    @POST
+    @Path("/create")
+    
+    public void ajouter(Personne p){
+        personneModel.create(p);
+    }
+
+}
+
+-----------------------------------------------
+
+package com.stema.ws;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
+
+@ApplicationPath("/ws")
+public class JaxRS extends Application {
+    
+}
+
